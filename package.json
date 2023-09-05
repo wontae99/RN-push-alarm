@@ -9,6 +9,8 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@react-native-firebase/app": "^18.3.2",
+    "@react-native-firebase/messaging": "^18.3.2",
     "expo": "~48.0.15",
     "expo-device": "^5.2.1",
     "expo-notifications": "~0.18.1",

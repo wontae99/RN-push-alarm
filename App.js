@@ -32,14 +32,18 @@ export default function App() {
         return;
       }
 
-      const pushTokenData = await Notification.getExpoPushTokenAsync();
-      console.log(pushTokenData);
+      const pushTokenData = await Notification.getExpoPushTokenAsync({
+        projectId: "c131d92f-63a1-44ce-b674-f6ce2b7c0656",
+      });
+      console.log("pushTokenData", pushTokenData);
     }
 
     if (Platform.OS === "android") {
       Notification.setNotificationChannelAsync("default", {
         name: "default",
         importance: Notification.AndroidImportance.DEFAULT,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
       });
     }
 
@@ -49,35 +53,35 @@ export default function App() {
   useEffect(() => {
     const subscription = Notification.addNotificationReceivedListener(
       (notification) => {
-        console.log("Notification received");
-        console.log(notification.request.content.data);
+        const userName = notification.request.content.data.userName;
+        console.log(`Notification received from ${userName}`);
+        console.log(notification);
       }
     );
 
     const subscription2 = Notification.addNotificationResponseReceivedListener(
       (response) => {
         console.log("Notification response");
-        console.log(response.notification.request.content);
+        console.log(response);
       }
     );
 
+    // clean-up function
     return () => {
       subscription.remove();
       subscription2.remove();
     };
   }, []);
 
-  function scheduleNotificationHandler() {
+  function localNotificationHandler() {
     Notification.scheduleNotificationAsync({
       content: {
-        title: "My first local Notification",
-        subtitle: "My subtitle",
-        body: "This is the body of Notification",
+        title: "로컬 알림",
+        subtitle: "로컬 알림 테스트",
+        body: "로컬 알림 테스트 바디입니다!",
         data: { userName: "wontae" },
       },
-      trigger: {
-        seconds: 2,
-      },
+      trigger: null,
     });
   }
 
@@ -89,19 +93,30 @@ export default function App() {
       },
       body: JSON.stringify({
         to: "ExponentPushToken[oRH3S5BI2fn0UvhnwcJcBg]",
-        title: "Test - sent from a device!",
-        body: "This is a test!",
+        title: "푸시알림 테스트",
+        body: "푸시알림 테스트 바디입니다!",
+        data: { userName: "server" },
       }),
     });
   }
 
   return (
     <View style={styles.container}>
-      <Button
-        title="Schedule Notification"
-        onPress={sendPushNotificationHandler}
-      />
-      <Text>Open up App.js to start working on your app!</Text>
+      <View style={styles.paddingV}>
+        <View style={styles.paddingV}>
+          <Button
+            title="Push Notification"
+            onPress={sendPushNotificationHandler}
+          />
+        </View>
+        <View style={styles.paddingV}>
+          <Button
+            title="Local Notification"
+            onPress={localNotificationHandler}
+          />
+        </View>
+      </View>
+      <Text>푸시 알림 테스트</Text>
       <StatusBar style="auto" />
     </View>
   );
@@ -114,119 +129,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  paddingV: {
+    paddingVertical: 4,
+  },
 });
-
-// import { useState, useEffect, useRef } from "react";
-// import { Text, View, Button, Platform } from "react-native";
-// import * as Device from "expo-device";
-// import * as Notifications from "expo-notifications";
-
-// Notifications.setNotificationHandler({
-//   handleNotification: async () => ({
-//     shouldShowAlert: true,
-//     shouldPlaySound: false,
-//     shouldSetBadge: false,
-//   }),
-// });
-
-// export default function App() {
-//   const [expoPushToken, setExpoPushToken] = useState("");
-//   const [notification, setNotification] = useState(false);
-//   const notificationListener = useRef();
-//   const responseListener = useRef();
-
-//   useEffect(() => {
-//     registerForPushNotificationsAsync().then((token) =>
-//       setExpoPushToken(token)
-//     );
-
-//     notificationListener.current =
-//       Notifications.addNotificationReceivedListener((notification) => {
-//         setNotification(notification);
-//       });
-
-//     responseListener.current =
-//       Notifications.addNotificationResponseReceivedListener((response) => {
-//         console.log(response);
-//       });
-
-//     return () => {
-//       Notifications.removeNotificationSubscription(
-//         notificationListener.current
-//       );
-//       Notifications.removeNotificationSubscription(responseListener.current);
-//     };
-//   }, []);
-
-//   return (
-//     <View
-//       style={{
-//         flex: 1,
-//         alignItems: "center",
-//         justifyContent: "space-around",
-//       }}
-//     >
-//       <Text>Your expo push token: {expoPushToken}</Text>
-//       <View style={{ alignItems: "center", justifyContent: "center" }}>
-//         <Text>
-//           Title: {notification && notification.request.content.title}{" "}
-//         </Text>
-//         <Text>Body: {notification && notification.request.content.body}</Text>
-//         <Text>
-//           Data:{" "}
-//           {notification && JSON.stringify(notification.request.content.data)}
-//         </Text>
-//       </View>
-//       <Button
-//         title="Press to schedule a notification"
-//         onPress={async () => {
-//           await schedulePushNotification();
-//         }}
-//       />
-//     </View>
-//   );
-// }
-
-// async function schedulePushNotification() {
-//   await Notifications.scheduleNotificationAsync({
-//     content: {
-//       title: "You've got mail! 📬",
-//       body: "Here is the notification body",
-//       data: { data: "goes here" },
-//     },
-//     trigger: { seconds: 2 },
-//   });
-// }
-
-// async function registerForPushNotificationsAsync() {
-//   let token;
-
-//   if (Platform.OS === "android") {
-//     await Notifications.setNotificationChannelAsync("default", {
-//       name: "default",
-//       importance: Notifications.AndroidImportance.MAX,
-//       vibrationPattern: [0, 250, 250, 250],
-//       lightColor: "#FF231F7C",
-//     });
-//   }
-
-//   if (Device.isDevice) {
-//     const { status: existingStatus } =
-//       await Notifications.getPermissionsAsync();
-//     let finalStatus = existingStatus;
-//     if (existingStatus !== "granted") {
-//       const { status } = await Notifications.requestPermissionsAsync();
-//       finalStatus = status;
-//     }
-//     if (finalStatus !== "granted") {
-//       alert("Failed to get push token for push notification!");
-//       return;
-//     }
-//     token = (await Notifications.getExpoPushTokenAsync()).data;
-//     console.log(token);
-//   } else {
-//     alert("Must use physical device for Push Notifications");
-//   }
-
-//   return token;
-// }

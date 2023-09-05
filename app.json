@@ -19,7 +19,10 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.wontae.notif",
+      "googleServicesFile": "./google-services.json",
+      "useNextNotificationsApi": true
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -28,7 +31,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./local/assets/icon.png",
+          "icon": "./assets/icon.png",
           "color": "#ffffff"
         }
       ]
